@@ -1,7 +1,15 @@
+import 'package:ceia_comigo/services/user_client_services.dart';
 import 'package:flutter/material.dart';
+import '../viewmodels/user_client_viewmodel.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => UserClientViewmodel(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -113,9 +121,70 @@ class RegisterForm extends StatelessWidget {
   }
 }
 
-class LoginForm extends StatelessWidget {
+class LoginForm extends StatefulWidget {
+  const LoginForm({super.key});
+
+  @override
+  State<LoginForm> createState() => _LoginForm();
+}
+
+class _LoginForm extends State<LoginForm> {
+  bool isLoading = false;
+  bool hasError = false;
+  String errorMessage = "Error goes here";
   @override
   Widget build(BuildContext context) {
+    final TextEditingController emailController = TextEditingController();
+    final TextEditingController passwordController = TextEditingController();
+
+    Future<void> _handleLogin() async {
+      setState(() {
+        isLoading = true;
+      });
+      final viewModel = Provider.of<UserClientViewmodel>(
+        context,
+        listen: false,
+      );
+      final result = await viewModel.validateUserClient(
+        emailController.text,
+        passwordController.text,
+      );
+      switch (result) {
+        case UserClientValidation.validPassword:
+          {
+            setState(() {
+              hasError = true;
+              errorMessage = "VALID ACCOUNT";
+            });
+          }
+        case UserClientValidation.wrongEmail:
+          {
+            setState(() {
+              hasError = true;
+              errorMessage = "Invalid email";
+            });
+          }
+        case UserClientValidation.invalidPassword:
+          {
+            setState(() {
+              hasError = true;
+              errorMessage = "Wrong password";
+            });
+          }
+        default:
+          {
+            setState(() {
+              hasError = true;
+              errorMessage =
+                  "Something went wrong, probably internet connection";
+            });
+          }
+      }
+      setState(() {
+        isLoading = false;
+      });
+    }
+
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -136,6 +205,7 @@ class LoginForm extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   TextField(
+                    controller: emailController,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       hint: Text("Enter your email"),
@@ -143,6 +213,7 @@ class LoginForm extends StatelessWidget {
                   ),
                   SizedBox(height: 24),
                   TextField(
+                    controller: passwordController,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       hint: Text("Enter your password"),
@@ -157,9 +228,16 @@ class LoginForm extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 2),
-                  SizedBox(
-                    child: FilledButton(onPressed: () {}, child: Text("Login")),
-                  ),
+                  isLoading
+                      ? CircularProgressIndicator()
+                      : SizedBox(
+                          child: FilledButton(
+                            onPressed: () async {
+                              await _handleLogin();
+                            },
+                            child: Text("Login"),
+                          ),
+                        ),
                   Row(
                     children: [
                       Text("Forgot password?"),
@@ -175,6 +253,14 @@ class LoginForm extends StatelessWidget {
                         child: Text("Recover here"),
                       ),
                     ],
+                  ),
+                  Visibility(
+                    visible: hasError,
+                    child: Text(
+                      errorMessage,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.red),
+                    ),
                   ),
                 ],
               ),
