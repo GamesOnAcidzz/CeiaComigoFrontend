@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart';
 import '../models/user_client.dart';
 import '../services/user_client_services.dart';
 
@@ -33,15 +34,9 @@ class UserClientViewmodel extends ChangeNotifier {
   ) async {
     _isLoading = true;
     _error = null;
-    UserClientValidation code = UserClientValidation.wrongEmail;
-    notifyListeners();
 
-    try {
-      code = await _apiService.validateUserClientLogin(email, password);
-    } catch (e) {
-      _error = e.toString();
-    }
-    notifyListeners();
-    return code;
+    final response = await _apiService.validateUserClientLogin(email, password);
+    debugPrint("Code:  $response");
+    return response;
   }
 }

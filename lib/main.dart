@@ -132,12 +132,19 @@ class _LoginForm extends State<LoginForm> {
   bool isLoading = false;
   bool hasError = false;
   String errorMessage = "Error goes here";
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final TextEditingController emailController = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
-
-    Future<void> _handleLogin() async {
+    Future<void> handleLogin() async {
       setState(() {
         isLoading = true;
       });
@@ -149,6 +156,7 @@ class _LoginForm extends State<LoginForm> {
         emailController.text,
         passwordController.text,
       );
+      debugPrint("Result: $result");
       switch (result) {
         case UserClientValidation.validPassword:
           {
@@ -233,7 +241,7 @@ class _LoginForm extends State<LoginForm> {
                       : SizedBox(
                           child: FilledButton(
                             onPressed: () async {
-                              await _handleLogin();
+                              await handleLogin();
                             },
                             child: Text("Login"),
                           ),
