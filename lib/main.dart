@@ -1,7 +1,10 @@
 import 'package:ceia_comigo/services/user_client_services.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../viewmodels/user_client_viewmodel.dart';
 import 'package:provider/provider.dart';
+import '../home.dart';
+import '../theme.dart';
 
 void main() {
   runApp(
@@ -21,6 +24,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Ceia Comigo',
       theme: ThemeData(
+        textTheme: GoogleFonts.aBeeZeeTextTheme(),
+        useMaterial3: true,
         // This is the theme of your application.
         //
         // TRY THIS: Try running your application with "flutter run". You'll see
@@ -36,11 +41,19 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Color.fromRGBO(111, 207, 83, 1),
-        ),
+        colorScheme: MaterialTheme.lightScheme(),
       ),
-      home: LoginForm(),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorScheme: MaterialTheme.darkScheme(),
+      ),
+      themeMode: ThemeMode.system,
+      initialRoute: "/login",
+      routes: {
+        "/login": (context) => LoginForm(),
+        "/register": (context) => RegisterForm(),
+        "/home": (context) => Home(),
+      },
     );
   }
 }
@@ -142,57 +155,50 @@ class _LoginForm extends State<LoginForm> {
     super.dispose();
   }
 
+  Future<void> handleLogin() async {
+    setState(() {
+      isLoading = true;
+    });
+    final viewModel = Provider.of<UserClientViewmodel>(context, listen: false);
+    final result = await viewModel.validateUserClient(
+      emailController.text,
+      passwordController.text,
+    );
+    debugPrint("Result: $result");
+    switch (result) {
+      case UserClientValidation.validPassword:
+        {
+          Navigator.pushNamed(context, "/home");
+        }
+      case UserClientValidation.wrongEmail:
+        {
+          setState(() {
+            hasError = true;
+            errorMessage = "Invalid email";
+          });
+        }
+      case UserClientValidation.invalidPassword:
+        {
+          setState(() {
+            hasError = true;
+            errorMessage = "Wrong password";
+          });
+        }
+      default:
+        {
+          setState(() {
+            hasError = true;
+            errorMessage = "Something went wrong, probably internet connection";
+          });
+        }
+    }
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    Future<void> handleLogin() async {
-      setState(() {
-        isLoading = true;
-      });
-      final viewModel = Provider.of<UserClientViewmodel>(
-        context,
-        listen: false,
-      );
-      final result = await viewModel.validateUserClient(
-        emailController.text,
-        passwordController.text,
-      );
-      debugPrint("Result: $result");
-      switch (result) {
-        case UserClientValidation.validPassword:
-          {
-            setState(() {
-              hasError = true;
-              errorMessage = "VALID ACCOUNT";
-            });
-          }
-        case UserClientValidation.wrongEmail:
-          {
-            setState(() {
-              hasError = true;
-              errorMessage = "Invalid email";
-            });
-          }
-        case UserClientValidation.invalidPassword:
-          {
-            setState(() {
-              hasError = true;
-              errorMessage = "Wrong password";
-            });
-          }
-        default:
-          {
-            setState(() {
-              hasError = true;
-              errorMessage =
-                  "Something went wrong, probably internet connection";
-            });
-          }
-      }
-      setState(() {
-        isLoading = false;
-      });
-    }
-
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -202,96 +208,95 @@ class _LoginForm extends State<LoginForm> {
     return Scaffold(
       appBar: AppBar(title: Text("Login Account"), centerTitle: true),
       body: Center(
-        child: FractionallySizedBox(
-          widthFactor: 0.7,
-          child: Stack(
-            alignment: Alignment(0.0, 0.0),
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextField(
-                    controller: emailController,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hint: Text("Enter your email"),
-                    ),
-                  ),
-                  SizedBox(height: 24),
-                  TextField(
-                    controller: passwordController,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hint: Text("Enter your password"),
-                    ),
-                    obscureText: true,
-                  ),
-                  SizedBox(height: 2),
-                  Row(
-                    children: [
-                      Checkbox(value: true, onChanged: (bool) {}),
-                      Text("Keep me logged in."),
-                    ],
-                  ),
-                  SizedBox(height: 2),
-                  isLoading
-                      ? CircularProgressIndicator()
-                      : SizedBox(
-                          child: FilledButton(
-                            onPressed: () async {
-                              await handleLogin();
-                            },
-                            child: Text("Login"),
-                          ),
-                        ),
-                  Row(
-                    children: [
-                      Text("Forgot password?"),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => RegisterForm(),
-                            ),
-                          );
-                        },
-                        child: Text("Recover here"),
-                      ),
-                    ],
-                  ),
-                  Visibility(
-                    visible: hasError,
-                    child: Text(
-                      errorMessage,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                alignment: Alignment.bottomCenter,
-                child: Row(
+        child: Container(
+          child: FractionallySizedBox(
+            widthFactor: 0.7,
+            child: Stack(
+              alignment: Alignment(0.0, 0.0),
+              children: [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text("Don't have an account?"),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => RegisterForm(),
+                    TextField(
+                      controller: emailController,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hint: Text("Enter your email"),
+                      ),
+                    ),
+                    SizedBox(height: 24),
+                    TextField(
+                      controller: passwordController,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hint: Text("Enter your password"),
+                      ),
+                      obscureText: true,
+                    ),
+                    SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Checkbox(value: true, onChanged: (bool) {}),
+                        Text("Keep me logged in."),
+                      ],
+                    ),
+                    SizedBox(height: 2),
+                    isLoading
+                        ? CircularProgressIndicator()
+                        : SizedBox(
+                            child: FilledButton(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
+                              ),
+                              onPressed: () async {
+                                await handleLogin();
+                              },
+                              child: Text("Login"),
+                            ),
                           ),
-                        );
-                      },
-                      child: Text("Signup here"),
+                    Row(
+                      children: [
+                        Text("Forgot password?"),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, "/login");
+                          },
+                          child: Text("Recover here"),
+                        ),
+                      ],
+                    ),
+                    Visibility(
+                      visible: hasError,
+                      child: Text(
+                        errorMessage,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ],
+                Container(
+                  alignment: Alignment.bottomCenter,
+                  child: Row(
+                    children: [
+                      Text("Don't have an account?"),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, "/register");
+                        },
+                        child: Text("Signup here"),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
