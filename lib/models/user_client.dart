@@ -1,11 +1,10 @@
 class UserClient {
-  final int id;
-  final String name;
-  final String email;
+  int id;
+  String name;
 
-  UserClient({required this.id, required this.name, required this.email});
+  UserClient({required this.id, required this.name});
 
   factory UserClient.fromJson(Map<String, dynamic> json) {
-    return UserClient(id: json["id"], name: json["name"], email: json["email"]);
+    return UserClient(id: json['id'], name: json['name']);
   }
 }

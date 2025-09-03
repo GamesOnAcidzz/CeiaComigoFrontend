@@ -1,7 +1,7 @@
-import 'package:ceia_comigo/services/user_client_services.dart';
+import 'package:ceia_comigo/services/user_session_services.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../viewmodels/user_client_viewmodel.dart';
+import 'viewmodels/user_session_viewmodel.dart';
 import 'package:provider/provider.dart';
 import '../home.dart';
 import '../theme.dart';
@@ -9,7 +9,7 @@ import '../theme.dart';
 void main() {
   runApp(
     ChangeNotifierProvider(
-      create: (_) => UserClientViewmodel(),
+      create: (_) => UserSessiontViewmodel(),
       child: const MyApp(),
     ),
   );
@@ -159,25 +159,28 @@ class _LoginForm extends State<LoginForm> {
     setState(() {
       isLoading = true;
     });
-    final viewModel = Provider.of<UserClientViewmodel>(context, listen: false);
-    final result = await viewModel.validateUserClient(
+    final viewModel = Provider.of<UserSessiontViewmodel>(
+      context,
+      listen: false,
+    );
+    final result = await viewModel.loginUserSession(
       emailController.text,
       passwordController.text,
     );
     debugPrint("Result: $result");
-    switch (result) {
-      case UserClientValidation.validPassword:
+    switch (result.code) {
+      case 200:
         {
           Navigator.pushNamed(context, "/home");
         }
-      case UserClientValidation.wrongEmail:
+      case 401:
         {
           setState(() {
             hasError = true;
             errorMessage = "Invalid email";
           });
         }
-      case UserClientValidation.invalidPassword:
+      case 402:
         {
           setState(() {
             hasError = true;
