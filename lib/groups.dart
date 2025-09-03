@@ -1,5 +1,8 @@
+import 'package:ceia_comigo/views/groups/groupLobby.dart';
+import 'package:ceia_comigo/views/groups/groupSearchCreate.dart';
 import 'package:flutter/material.dart';
-import '../restaurants.dart';
+import '../widgets/counter.dart';
+import 'package:ceia_comigo/models/restaraunt.dart';
 
 class GroupSearch extends StatefulWidget {
   @override
@@ -26,6 +29,9 @@ class _GroupSearchState extends State<GroupSearch> {
               break;
             case 'create':
               builder = (_) => GroupSearchCreate();
+              break;
+            case 'lobby':
+              builder = (_) => GroupLobby();
               break;
             default:
               builder = (_) => GroupSearchHome();
@@ -67,17 +73,6 @@ class GroupSearchHome extends StatelessWidget {
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       Expanded(
-                        flex: 1,
-                        child: Text(
-                          "Public",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 24,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
-                        ),
-                      ),
-                      Expanded(
                         flex: 5,
                         child: SizedBox(
                           width: double.infinity,
@@ -97,49 +92,8 @@ class GroupSearchHome extends StatelessWidget {
                           width: double.infinity,
                           child: GroupSearchButton(
                             onPressed: () => {},
-                            name: "Join",
-                            icon: Icons.groups,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(width: 20),
-              Expanded(
-                child: Container(
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.onSecondary,
-                      width: 1,
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: Text(
-                          "Private",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 24,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 5,
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: GroupSearchButton(
-                            onPressed: () => {},
-                            name: "Create",
-                            icon: Icons.add_box,
+                            name: "Find",
+                            icon: Icons.search,
                           ),
                         ),
                       ),
@@ -163,79 +117,6 @@ class GroupSearchHome extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class GroupSearchCreate extends StatefulWidget {
-  @override
-  State<GroupSearchCreate> createState() => _GroupSearchCreateState();
-}
-
-class _GroupSearchCreateState extends State<GroupSearchCreate> {
-  bool isPublic = false;
-  bool isLooking = false;
-  @override
-  Widget build(context) {
-    return Stack(
-      children: [
-        Container(
-          color: Theme.of(context).colorScheme.secondary,
-          width: double.infinity,
-          padding: EdgeInsets.all(20),
-          child: Center(
-            child: Column(
-              children: [
-                SegmentedButton(
-                  segments: const <ButtonSegment<bool>>[
-                    ButtonSegment(value: false, label: Text("Private")),
-                    ButtonSegment(value: true, label: Text("Public")),
-                  ],
-                  selected: <bool>{isPublic},
-                  onSelectionChanged: (newSelection) {
-                    setState(() {
-                      isPublic = newSelection.first;
-                    });
-                  },
-                ),
-                if (isPublic)
-                  TextField(
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hint: Text("Name of the group"),
-                    ),
-                    obscureText: true,
-                  ),
-                TextButton.icon(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(
-                      Theme.of(context).colorScheme.onSecondary,
-                    ),
-                  ),
-                  onPressed: () => {
-                    setState(() {
-                      isLooking = true;
-                    }),
-                  },
-                  label: Text("Look for a place"),
-                  icon: Icon(Icons.search),
-                ),
-              ],
-            ),
-          ),
-        ),
-        if (isLooking)
-          Center(
-            heightFactor: 1,
-            child: GroupSearchRestaurant(
-              onClose: () => {
-                setState(() {
-                  isLooking = false;
-                }),
-              },
-            ),
-          ),
-      ],
     );
   }
 }
@@ -276,33 +157,35 @@ class GroupSearchButton extends StatelessWidget {
 
 class GroupSearchRestaurant extends StatefulWidget {
   final void Function()? onClose;
-  GroupSearchRestaurant({required this.onClose});
+  final void Function(Restaurant) onAddPlace;
+  GroupSearchRestaurant({required this.onClose, required this.onAddPlace});
 
   @override
   _GroupSearchRestaurantState createState() => _GroupSearchRestaurantState();
 }
 
 class _GroupSearchRestaurantState extends State<GroupSearchRestaurant> {
-  List<RestarauntPlaceholder> restaraunts = [
-    RestarauntPlaceholder(name: "Sole Mio", publicGroups: 2),
-    RestarauntPlaceholder(name: "Turkish"),
-    RestarauntPlaceholder(name: "Fim do Mundo"),
-    RestarauntPlaceholder(name: "Joans", publicGroups: 3),
-    RestarauntPlaceholder(name: "Sole Mio"),
-    RestarauntPlaceholder(name: "Turkish"),
-    RestarauntPlaceholder(name: "Fim do Mundo", publicGroups: 3),
-    RestarauntPlaceholder(name: "Joans"),
-    RestarauntPlaceholder(name: "Joans"),
-    RestarauntPlaceholder(name: "Joans"),
-    RestarauntPlaceholder(name: "Joans"),
-    RestarauntPlaceholder(name: "Joans"),
-    RestarauntPlaceholder(name: "Joans"),
-    RestarauntPlaceholder(name: "Joans"),
+  List<Restaurant> restaraunts = [
+    Restaurant(name: "Sole Mio"),
+    Restaurant(name: "Turkish"),
+    Restaurant(name: "Fim do Mundo"),
+    Restaurant(name: "Joans"),
+    Restaurant(name: "Sole Mio"),
+    Restaurant(name: "Turkish"),
+    Restaurant(name: "Fim do Mundo"),
+    Restaurant(name: "Joans"),
+    Restaurant(name: "Joans"),
+    Restaurant(name: "Joans"),
+    Restaurant(name: "Joans"),
+    Restaurant(name: "Joans"),
+    Restaurant(name: "Joans"),
+    Restaurant(name: "Joans"),
   ];
 
-  List<RestarauntPlaceholder> searchedRestaraunts = [];
+  List<Restaurant> searchedRestaraunts = [];
   TextEditingController searchController = TextEditingController();
-
+  bool isDetails = false;
+  late Restaurant currentRestaurant;
   @override
   void initState() {
     super.initState();
@@ -313,7 +196,7 @@ class _GroupSearchRestaurantState extends State<GroupSearchRestaurant> {
   Widget build(context) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.secondary,
+        color: Theme.of(context).colorScheme.secondaryContainer,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
@@ -325,54 +208,88 @@ class _GroupSearchRestaurantState extends State<GroupSearchRestaurant> {
       child: Column(
         children: [
           SizedBox(height: 20),
-          SearchBar(
-            controller: searchController,
-            hintText: 'Search...',
-            leading: Icon(Icons.search),
-            onChanged: (query) {
-              setState(() {
-                searchedRestaraunts = restaraunts
-                    .where(
-                      (r) => r.name.toLowerCase().contains(query.toLowerCase()),
-                    )
-                    .toList();
-                // Update search results
-              });
-            },
-            trailing: [
-              IconButton(
-                icon: Icon(Icons.clear),
-                onPressed: () {
-                  setState(() {
-                    searchedRestaraunts = restaraunts;
-                    searchController.clear();
-                  });
-                  // Clear search
-                },
-              ),
-            ],
-          ),
-          SizedBox(height: 20),
           Expanded(
-            child: GridView.builder(
-              itemCount: searchedRestaraunts.length,
-              padding: EdgeInsets.all(20),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                mainAxisSpacing: 20,
-                crossAxisSpacing: 20,
-              ),
-              itemBuilder: (context, index) {
-                final restaurant = searchedRestaraunts[index];
-                return RestItem(
-                  name: searchedRestaraunts[index].name,
-                  publicGroups: searchedRestaraunts[index].publicGroups,
-                  onTap: (name) {},
-                );
-              },
+            child: Stack(
+              children: [
+                Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.only(left: 20, right: 20),
+                      child: SearchBar(
+                        controller: searchController,
+                        hintText: 'Search...',
+                        leading: Icon(Icons.search),
+                        onChanged: (query) {
+                          setState(() {
+                            searchedRestaraunts = restaraunts
+                                .where(
+                                  (r) => r.name.toLowerCase().contains(
+                                    query.toLowerCase(),
+                                  ),
+                                )
+                                .toList();
+                            // Update search results
+                          });
+                        },
+                        trailing: [
+                          IconButton(
+                            icon: Icon(Icons.clear),
+                            onPressed: () {
+                              setState(() {
+                                searchedRestaraunts = restaraunts;
+                                searchController.clear();
+                              });
+                              // Clear search
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Expanded(
+                      child: GridView.builder(
+                        itemCount: searchedRestaraunts.length,
+                        padding: EdgeInsets.all(20),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          mainAxisSpacing: 20,
+                          crossAxisSpacing: 20,
+                        ),
+                        itemBuilder: (context, index) {
+                          final restaurant = searchedRestaraunts[index];
+                          return SearchRestItem(
+                            restaurant: restaurant,
+                            onTap: (searchRestaurant) {
+                              setState(() {
+                                currentRestaurant = searchRestaurant;
+                                isDetails = true;
+                              });
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                if (isDetails)
+                  GroupSearchRestaurantDetails(
+                    restaurant: currentRestaurant,
+                    onLookAnotherPlace: () {
+                      setState(() {
+                        isDetails = false;
+                      });
+                    },
+                    onAddPlace: (new_restaurant) {
+                      setState(() {
+                        widget.onAddPlace(new_restaurant);
+                      });
+                    },
+                  ),
+              ],
             ),
           ),
           IconButton.outlined(
+            style: ButtonStyle(),
             onPressed: () {
               widget.onClose!();
             },
@@ -384,34 +301,133 @@ class _GroupSearchRestaurantState extends State<GroupSearchRestaurant> {
   }
 }
 
-class RestItem extends StatelessWidget {
-  final String name;
-  final int publicGroups;
-  final void Function(String name)? onTap;
+class GroupSearchRestaurantDetails extends StatefulWidget {
+  late Restaurant restaurant;
+  final void Function() onLookAnotherPlace;
+  final void Function(Restaurant) onAddPlace;
 
-  RestItem({required this.name, this.publicGroups = 0, this.onTap});
+  GroupSearchRestaurantDetails({
+    required this.restaurant,
+    required this.onLookAnotherPlace,
+    required this.onAddPlace,
+  });
+
+  _GroupSearchRestaurantDetailsState createState() =>
+      _GroupSearchRestaurantDetailsState();
+}
+
+class _GroupSearchRestaurantDetailsState
+    extends State<GroupSearchRestaurantDetails> {
+  @override
+  Widget build(context) {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: Theme.of(context).colorScheme.secondaryContainer,
+      child: Column(
+        children: [
+          Text(
+            widget.restaurant.name,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 24),
+          ),
+          TabBar(
+            labelColor: Theme.of(context).colorScheme.secondary,
+            indicatorColor: Theme.of(context).colorScheme.secondary,
+            unselectedLabelColor: Theme.of(context).colorScheme.onSurface,
+            tabs: [
+              Tab(text: "Details", icon: Icon(Icons.restaurant)),
+              Tab(text: "Menu", icon: Icon(Icons.restaurant_menu)),
+              Tab(text: "Discounts", icon: Icon(Icons.discount)),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                Container(width: double.infinity, color: Colors.white),
+                Container(width: double.infinity, color: Colors.white),
+                Container(width: double.infinity, color: Colors.white),
+              ],
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.only(left: 20, right: 20),
+            width: double.infinity,
+            child: TextButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStatePropertyAll(
+                  Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+              onPressed: () {
+                widget.onAddPlace(widget.restaurant);
+              },
+              child: Text(
+                "Add place",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSecondary,
+                ),
+              ),
+            ),
+          ),
+
+          Container(
+            padding: EdgeInsets.only(left: 20, right: 20),
+            width: double.infinity,
+            child: TextButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStatePropertyAll(
+                  Theme.of(context).colorScheme.secondaryFixedDim,
+                ),
+              ),
+              onPressed: () {
+                widget.onLookAnotherPlace();
+              },
+              child: Text(
+                "Look for another place",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SearchRestItem extends StatelessWidget {
+  final Restaurant restaurant;
+  final void Function(Restaurant name)? onTap;
+
+  SearchRestItem({required this.restaurant, this.onTap});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => {onTap!(name)},
+      onTap: () => {onTap!(restaurant)},
       child: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.secondaryContainer,
+          color: Theme.of(context).colorScheme.secondary,
           borderRadius: BorderRadius.all(Radius.circular(20)),
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(
           children: [
-            Visibility(
-              visible: true ? publicGroups > 0 : false,
+            /*Visibility(
+              visible: true ? restaurant.groups != null : false,
               child: Container(
                 margin: EdgeInsets.all(4),
                 child: Column(
-                  children: [Icon(Icons.groups), Text("$publicGroups")],
+                  children: [
+                    Icon(Icons.groups),
+                    Text("${restaurant.groups!.length}"),
+                  ],
                 ),
               ),
             ),
+            */
             Column(
               mainAxisSize: MainAxisSize.max,
               children: [
@@ -420,8 +436,8 @@ class RestItem extends StatelessWidget {
                   flex: 1,
                   child: Container(
                     alignment: Alignment.center,
-                    color: Theme.of(context).colorScheme.onSecondary,
-                    child: Text(name),
+                    color: Theme.of(context).colorScheme.secondaryFixedDim,
+                    child: Text(restaurant.name),
                   ),
                 ),
               ],
